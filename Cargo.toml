@@ -10,6 +10,7 @@ publish = false
 [package.metadata.deb]
 maintainer = "XDflight <XDflight@users.noreply.github.com>"
 section = "utils"
+extended-description = "Shows a sessions x organizations matrix and lets you link, sync and unlink Claude Code session records across the organizations of the Claude desktop app."
 # The window system and GL libraries are loaded at run time, so list them explicitly.
 depends = "$auto, libxkbcommon0, libegl1, libgl1"
 assets = [

@@ -33,6 +33,13 @@ notarized, so macOS blocks the first launch: open **System Settings → Privacy 
 xattr -dr com.apple.quarantine "/Applications/Claude Code Session Links.app"
 ```
 
+**Windows**: download `…-windows-x64-setup.exe` from the same page. It installs per user, without
+administrator rights. The installer is not code-signed, so SmartScreen shows a warning: click
+**More info → Run anyway**.
+
+**Linux**: download the `.deb` (Ubuntu 22.04+ / Debian 12+, x86_64) and install it with
+`sudo apt install ./claude-code-ln-…-linux-amd64.deb`, or unpack the `.tar.gz` and run the binary.
+
 **From source** (any platform):
 
 ```bash
@@ -86,9 +93,12 @@ cargo test
 cargo build --release
 ```
 
-`packaging/package-macos.sh` builds the universal `.app` and `.dmg` into `dist/`.
+`packaging/package-macos.sh` builds the universal `.app` and `.dmg` into `dist/`. The release
+workflow (`.github/workflows/release.yml`) builds and packages all three platforms when a `v*` tag is pushed.
 
-Developed and tested on macOS. The Windows and Linux code paths have not been compiled or run.
+Developed and used on macOS. The Windows and Linux builds compile and pass the unit tests in CI, but
+the app has not been run interactively there; in particular, locating the desktop app's data
+directory and detecting whether it is running are untested on those platforms.
 
 ## Screenshots
 

@@ -30,6 +30,12 @@ Claude 桌面端把每个 Claude Code 会话的元数据存成一个文件：
 xattr -dr com.apple.quarantine "/Applications/Claude Code Session Links.app"
 ```
 
+**Windows**：在同一页面下载 `…-windows-x64-setup.exe`。它按用户安装，不需要管理员权限。安装程序没有代码签名，
+SmartScreen 会弹出警告：点击 **更多信息 → 仍要运行**。
+
+**Linux**：下载 `.deb`（Ubuntu 22.04+ / Debian 12+，x86_64），用
+`sudo apt install ./claude-code-ln-…-linux-amd64.deb` 安装；或解压 `.tar.gz` 直接运行其中的二进制。
+
 **从源码运行**（任意平台）：
 
 ```bash
@@ -77,9 +83,11 @@ cargo test
 cargo build --release
 ```
 
-`packaging/package-macos.sh` 会在 `dist/` 下构建通用版 `.app` 与 `.dmg`。
+`packaging/package-macos.sh` 会在 `dist/` 下构建通用版 `.app` 与 `.dmg`。推送 `v*` 标签时，发布工作流
+（`.github/workflows/release.yml`）会构建并打包全部三个平台。
 
-只在 macOS 上开发和测试过，Windows 和 Linux 的代码路径没有编译或运行过。
+在 macOS 上开发和使用。Windows 和 Linux 的构建能在 CI 中编译并通过单元测试，但没有在这两个平台上实际运行过界面；
+尤其是定位桌面端数据目录、检测桌面端是否在运行这两处，在这些平台上未经验证。
 
 ## 截图
 
