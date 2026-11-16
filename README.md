@@ -1,60 +1,86 @@
 # claude-code-ln
 
-一个带 GUI 的小工具，用来管理 Claude 桌面端里 **Claude Code 会话在不同组织（organization）之间的“软链接”**。
+English | [中文](README.zh.md)
 
-## 原理
+A small GUI tool for managing **"soft links" of Claude Code sessions between organizations** in the Claude desktop app.
 
-Claude 桌面端把每个 Claude Code 会话的元数据存成一个文件：
+![The sessions × organizations matrix](docs/screenshots/matrix.png)
+
+## How it works
+
+The Claude desktop app stores the metadata of each Claude Code session in one file:
 
 ```text
-<数据目录>/claude-code-sessions/<账号 UUID>/<组织 UUID>/local_<会话 UUID>.json
+<data dir>/claude-code-sessions/<account UUID>/<organization UUID>/local_<session UUID>.json
 ```
 
-文件里的 `cliSessionId` 指向真正的对话转录 `~/.claude/projects/<项目>/<cliSessionId>.jsonl`
-（也就是 Claude Code TUI 里的 session）。会话出现在哪个组织，只取决于这个文件放在哪个组织目录里。
-所以把同一个 `local_*.json` 放进多个组织目录，这些组织就共享同一个会话 —— 多对一的“软链接”。
+The `cliSessionId` in that file points at the actual conversation transcript,
+`~/.claude/projects/<project>/<cliSessionId>.jsonl` (the session you see in the Claude Code TUI).
+Which organization a session appears under depends only on which organization folder the file is in.
+Put the same `local_*.json` into several organization folders and those organizations share one
+session: a many-to-one "soft link".
 
-本工具把这件事可视化：一张 **会话 × 组织** 的矩阵，点格子即可链接 / 取消链接。
+This tool makes that visual: a **sessions × organizations** matrix where you click cells to link and unlink.
 
-## 使用
+## Usage
 
 ```bash
 cargo run --release
 ```
 
-- **点击空心格子**：把会话链接到该组织；**点击实心格子**：从该组织取消链接。更改先进入底部的待应用列表，点“应用更改”后才写盘。
-- **同步**：各副本会各自演化（见下）。“同步”把最新副本（或你指定的副本）覆盖到其它副本。
-- **名称识别**：桌面端只用 UUID 命名目录。工具会从桌面端内嵌的 claude.ai 页面的本地缓存（IndexedDB）里只读地识别账号邮箱和组织名，并从 `~/.claude.json` 读取 Claude Code CLI 当前登录的账号与组织。缓存里只有当前登录账号的信息，所以识别结果会记在本工具自己的配置里；没识别到的可以在左侧栏手动填写，手动填写的名称优先。
-- **语言**：界面默认英文，右上角可切换为中文（会记住）。
-- 点击会话标题可查看每个副本的详情（转录 ID、转录文件是否存在、最后活动时间等）。
+- **Click an empty cell** to link the session into that organization; **click a filled cell** to unlink it from there. Changes are queued in the bar at the bottom and only written when you click **Apply changes**.
+- **Sync**: copies drift apart over time (see below). Sync overwrites the other copies with the newest one, or with a copy you pick.
+- **Names**: the desktop app names its folders by UUID only. The tool reads account e-mails and organization names, read-only, from the local cache (IndexedDB) of the claude.ai page embedded in the desktop app, and the account and organization the Claude Code CLI is logged in to from `~/.claude.json`. The cache only holds the account currently signed in, so detected names are remembered in the tool's own settings. Anything not detected can be typed in the side panel; typed names win.
+- **Columns** can be resized by dragging their right edge.
+- **Language**: English by default; the button in the top right switches to Chinese (remembered).
+- Click a session title to see every copy in detail: transcript ID, whether the transcript file exists, last activity, and so on.
 
-格子颜色：绿 = 最新副本，黄 = 元数据落后，紫 = 对话已分叉（两个副本指向不同转录），红 = 文件损坏。
+![Details of a forked session and the queue of pending changes](docs/screenshots/pending-changes.png)
 
-命令行参数：`--root <目录>` 指定会话存储目录，`--projects <目录>` 指定转录目录（便于在副本上试用）。
+Cell colors: green = newest copy, amber = metadata is behind, purple = forked (two copies point at
+different transcripts), red = broken file.
 
-## 需要知道的行为
+Command-line options: `--root <dir>` sets the session store, `--projects <dir>` sets the transcript
+directory (handy for trying the tool on a copy).
 
-这些结论来自对桌面端实现的阅读，桌面端更新后可能变化：
+## Things to know
 
-- **“链接”是复制，不是符号链接。** 桌面端保存会话时先写临时文件再重命名，真正的符号链接 / 硬链接在下一次保存时就会被普通文件替换。因此各副本会逐渐产生差异，需要时用“同步”拉齐。
-- **桌面端只在启动或切换组织时读取这些文件**，并会用内存中的状态覆盖当前组织里的文件。最稳妥的做法是先完全退出 Claude 再应用更改；否则应用更改后切换一次组织才能看到新链接，且不要改动当前所在组织的会话。工具检测到桌面端在运行时会给出提示。
-- **不要在桌面端里“删除”已链接的会话。** 桌面端的删除会清理按会话 ID 共享的工作树、笔记等。想让会话从某个组织消失，用本工具的“取消链接”。
-- 两个组织同时继续同一个会话时，转录可能分叉（矩阵里显示为紫色）。
+These come from reading the desktop app's implementation and may change when the app updates:
 
-## 安全性
+- **A link is a copy, not a symlink.** The app saves a session by writing a temp file and renaming it, so a real symlink or hard link is replaced by a regular file on the next save. Copies therefore drift apart; use Sync to realign them.
+- **The app only reads these files at startup or when you switch organizations**, and it overwrites the files of the current organization from memory. The safest approach is to quit Claude before applying changes. Otherwise, switch organizations once afterwards to see new links, and do not change sessions of the organization you are currently in. The tool shows a notice while the app is running.
+- **Do not delete a linked session inside the desktop app.** The app's delete also cleans up the worktree and notes that are shared by session ID. To make a session disappear from one organization, use Unlink here.
+- When two organizations both continue the same session, the transcripts can fork (shown in purple).
 
-- 从不触碰对话转录（`.jsonl`）。
-- 链接不会覆盖已有文件；写入是原子的（同目录临时文件 + 落盘），权限为 `0600`。
-- 被“同步”替换或被“取消链接”移除的文件，都会先进入备份目录
-  `<本工具数据目录>/backups/<时间戳>/<账号>/<组织>/`（macOS 上为 `~/Library/Application Support/claude-code-ln/`）。
-- 拒绝移除一个会话最后一份可读的副本。
+## Safety
 
-## 构建
+- Transcripts (`.jsonl`) are never touched.
+- Linking never overwrites an existing file. Writes are atomic (temp file in the same folder, then put in place) with mode `0600`.
+- Files replaced by Sync or removed by Unlink are first moved to
+  `<tool data dir>/backups/<timestamp>/<account>/<organization>/`
+  (on macOS the tool data dir is `~/Library/Application Support/claude-code-ln/`).
+- The last readable copy of a session is never removed.
+- Before applying, the tool rescans the disk and stops if the plan you confirmed would no longer be the plan that runs.
 
-需要 Rust（edition 2024）。GUI 使用 [egui / eframe](https://github.com/emilk/egui)，中文字体取自系统字体。
-项目不使用任何密码学原语（副本比较是直接的字节比较；`snap` 仅用于解压 IndexedDB 缓存）。
+## Building
+
+Requires Rust (edition 2024). The GUI uses [egui / eframe](https://github.com/emilk/egui); CJK glyphs
+come from system fonts. No cryptographic primitives are used (copies are compared byte for byte;
+`snap` only decompresses the IndexedDB cache).
 
 ```bash
 cargo test
 cargo build --release
 ```
+
+Developed and tested on macOS. The Windows and Linux code paths have not been compiled or run.
+
+## Screenshots
+
+The screenshots use fictional data generated by [`docs/make-demo-store.py`](docs/make-demo-store.py).
+Run the tool with `HOME` pointing at the generated directory, and set `CLAUDE_CODE_LN_DEMO=1` to
+start with a session selected and a few changes queued (nothing is applied).
+
+The interface in Chinese:
+
+![The same view in Chinese](docs/screenshots/pending-changes-zh.png)
