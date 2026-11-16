@@ -57,6 +57,12 @@ fn main() -> eframe::Result {
     let options = eframe::NativeOptions {
         viewport: egui::ViewportBuilder::default()
             .with_title("Claude Code Session Links")
+            .with_app_id("claude-code-ln")
+            .with_icon(egui::IconData {
+                rgba: include_bytes!("../packaging/icon-128.rgba").to_vec(),
+                width: 128,
+                height: 128,
+            })
             .with_inner_size([1280.0, 760.0])
             .with_min_inner_size([760.0, 480.0]),
         ..Default::default()

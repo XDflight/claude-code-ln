@@ -1,0 +1,9 @@
+[Desktop Entry]
+Type=Application
+Name=Claude Code Session Links
+Comment=Link Claude Code sessions between organizations in the Claude desktop app
+Exec=claude-code-ln
+Icon=claude-code-ln
+Terminal=false
+Categories=Development;Utility;
+StartupWMClass=claude-code-ln

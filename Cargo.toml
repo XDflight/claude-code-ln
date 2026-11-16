@@ -1,7 +1,24 @@
 [package]
 name = "claude-code-ln"
-version = "0.1.0"
+version = "0.1.1"
 edition = "2024"
+description = "GUI tool for linking Claude Code sessions between organizations in the Claude desktop app"
+license = "BSD-2-Clause"
+repository = "https://github.com/XDflight/claude-code-ln"
+publish = false
+
+[package.metadata.deb]
+maintainer = "XDflight <XDflight@users.noreply.github.com>"
+section = "utils"
+# The window system and GL libraries are loaded at run time, so list them explicitly.
+depends = "$auto, libxkbcommon0, libegl1, libgl1"
+assets = [
+    ["target/release/claude-code-ln", "usr/bin/", "755"],
+    ["packaging/linux/claude-code-ln.desktop", "usr/share/applications/", "644"],
+    ["packaging/icon-256.png", "usr/share/icons/hicolor/256x256/apps/claude-code-ln.png", "644"],
+    ["README.md", "usr/share/doc/claude-code-ln/", "644"],
+    ["LICENSE", "usr/share/doc/claude-code-ln/", "644"],
+]
 
 [dependencies]
 chrono = { version = "0.4.45", default-features = false, features = ["clock", "std"] }
