@@ -20,11 +20,23 @@ Claude 桌面端把每个 Claude Code 会话的元数据存成一个文件：
 
 本工具把这件事可视化：一张 **会话 × 组织** 的矩阵，点格子即可链接 / 取消链接。
 
-## 使用
+## 安装
+
+**macOS**：从[最新 release](https://github.com/XDflight/claude-code-ln/releases/latest) 下载 `.dmg`
+（通用版：Apple 芯片与 Intel，macOS 11+），把应用拖进“应用程序”。应用没有经过公证，首次启动会被 macOS 拦截：
+打开 **系统设置 → 隐私与安全性**，点击 **仍要打开**，或者运行：
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/Claude Code Session Links.app"
+```
+
+**从源码运行**（任意平台）：
 
 ```bash
 cargo run --release
 ```
+
+## 使用
 
 - **点击空心格子**：把会话链接到该组织；**点击实心格子**：从该组织取消链接。更改先进入底部的待应用列表，点“应用更改”后才写盘。
 - **同步**：各副本会各自演化（见下）。“同步”把最新副本（或你指定的副本）覆盖到其它副本。
@@ -64,6 +76,8 @@ cargo run --release
 cargo test
 cargo build --release
 ```
+
+`packaging/package-macos.sh` 会在 `dist/` 下构建通用版 `.app` 与 `.dmg`。
 
 只在 macOS 上开发和测试过，Windows 和 Linux 的代码路径没有编译或运行过。
 

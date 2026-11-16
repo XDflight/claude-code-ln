@@ -22,11 +22,24 @@ session: a many-to-one "soft link".
 
 This tool makes that visual: a **sessions × organizations** matrix where you click cells to link and unlink.
 
-## Usage
+## Install
+
+**macOS**: download the `.dmg` from the [latest release](https://github.com/XDflight/claude-code-ln/releases/latest)
+(universal: Apple silicon and Intel, macOS 11+) and drag the app to Applications. The app is not
+notarized, so macOS blocks the first launch: open **System Settings → Privacy & Security** and click
+**Open Anyway**, or run:
+
+```bash
+xattr -dr com.apple.quarantine "/Applications/Claude Code Session Links.app"
+```
+
+**From source** (any platform):
 
 ```bash
 cargo run --release
 ```
+
+## Usage
 
 - **Click an empty cell** to link the session into that organization; **click a filled cell** to unlink it from there. Changes are queued in the bar at the bottom and only written when you click **Apply changes**.
 - **Sync**: copies drift apart over time (see below). Sync overwrites the other copies with the newest one, or with a copy you pick.
@@ -72,6 +85,8 @@ come from system fonts. No cryptographic primitives are used (copies are compare
 cargo test
 cargo build --release
 ```
+
+`packaging/package-macos.sh` builds the universal `.app` and `.dmg` into `dist/`.
 
 Developed and tested on macOS. The Windows and Linux code paths have not been compiled or run.
 
